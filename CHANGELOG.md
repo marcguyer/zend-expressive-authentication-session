@@ -22,7 +22,7 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Fixed
 
-- Nothing.
+- [#20](https://github.com/zendframework/zend-expressive-authentication-session/pull/20) ensures that a POST request will ignore pre-existing valid user session.
 
 ## 1.0.0 - 2018-09-27
 

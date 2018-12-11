@@ -79,11 +79,11 @@ class PhpSession implements AuthenticationInterface
             throw Exception\MissingSessionContainerException::create();
         }
 
-        if ($session->has(UserInterface::class)) {
-            return $this->createUserFromSession($session);
-        }
-
         if ('POST' !== strtoupper($request->getMethod())) {
+            if ($session->has(UserInterface::class)) {
+                return $this->createUserFromSession($session);
+            }
+
             return null;
         }
 

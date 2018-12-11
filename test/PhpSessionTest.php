@@ -141,6 +141,50 @@ class PhpSessionTest extends TestCase
         $this->assertNull($phpSession->authenticate($this->request->reveal()));
     }
 
+    public function testAuthenticationViaPostIgnoresSessionUser()
+    {
+        $this->request
+            ->getMethod()
+            ->willReturn('POST');
+
+        $this->session
+            ->has(UserInterface::class)
+            ->shouldNotBeCalled();
+        $this->session
+            ->get(UserInterface::class)
+            ->shouldNotBeCalled();
+
+        $this->request
+            ->getParsedBody()
+            ->willReturn([
+                'user' => 'foo',
+                'pass' => 'bar',
+            ]);
+
+        $this->userRegister
+            ->authenticate('foo', 'bar')
+            ->willReturn(null);
+
+        $this->session
+            ->set(UserInterface::class)
+            ->shouldNotBeCalled();
+
+        $this->request
+            ->getAttribute('session')
+            ->willReturn($this->session->reveal());
+
+        $phpSession = new PhpSession(
+            $this->userRegister->reveal(),
+            $this->defaultConfig,
+            $this->responseFactory,
+            $this->userFactory
+        );
+
+        $result = $phpSession->authenticate($this->request->reveal());
+
+        $this->assertNull($result);
+    }
+
     public function testAuthenticationWithNoSessionUserViaPostWithDefaultFieldsCanHaveSuccessfulResult()
     {
         $this->session
@@ -256,6 +300,9 @@ class PhpSessionTest extends TestCase
 
     public function testCanAuthenticateUserProvidedViaSession()
     {
+        $this->request
+            ->getMethod()
+            ->willReturn('GET');
         $this->session
             ->has(UserInterface::class)
             ->willReturn(true);
@@ -289,6 +336,9 @@ class PhpSessionTest extends TestCase
 
     public function testAuthenticationWhenSessionUserIsOfIncorrectTypeResultsInUnsuccessfulAuthentication()
     {
+        $this->request
+            ->getMethod()
+            ->willReturn('GET');
         $this->session
             ->has(UserInterface::class)
             ->willReturn(true);
